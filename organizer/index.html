@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrganizzaVisite</title>
+<style>
+  :root{
+    --bg:#f7f2ec;
+    --card:#ffffff;
+    --text:#3b2f28;
+    --muted:#9a8c80;
+    --border:#e9dfd4;
+    --accent:#d9653f;
+    --accent-2:#c2542f;
+    --ministrante:#c9861a;
+    --ministrante-bg:#fbf0d9;
+    --normale:#3f8f86;
+    --normale-bg:#e2f2ef;
+    --danger:#c2483a;
+    --shadow:0 1px 2px rgba(59,47,40,.05), 0 6px 18px rgba(59,47,40,.06);
+  }
+  *{ box-sizing:border-box; }
+  [hidden]{ display:none !important; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  main{ max-width:1080px; margin:0 auto; padding:28px 20px 80px; }
+
+  /* Header */
+  header{ background:var(--card); border-bottom:1px solid var(--border); }
+  .header-inner{ max-width:1080px; margin:0 auto; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .logo{ width:42px; height:42px; border-radius:12px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; flex:none; }
+  .brand h1{ margin:0; font-size:19px; letter-spacing:-.01em; }
+  .tagline{ margin:2px 0 0; color:var(--muted); font-size:13px; }
+  .header-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  /* Cards / sections */
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px 20px; box-shadow:var(--shadow); margin-bottom:20px; }
+  .section-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .section-head h2{ margin:0; font-size:16px; display:flex; align-items:center; gap:8px; }
+  .count{ font-size:12px; font-weight:600; color:var(--muted); background:var(--bg); border:1px solid var(--border); border-radius:999px; padding:1px 9px; }
+  .head-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  .columns{ display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; }
+  @media (max-width:860px){ .columns{ grid-template-columns:1fr; } }
+
+  /* Buttons */
+  .btn{
+    font:inherit; font-size:14px; font-weight:600; cursor:pointer;
+    border:1px solid transparent; border-radius:10px; padding:8px 14px;
+    display:inline-flex; align-items:center; gap:6px; transition:.15s; background:none; color:var(--text);
+  }
+  .btn.accent{ background:var(--accent); color:#fff; box-shadow:0 1px 0 rgba(0,0,0,.06); }
+  .btn.accent:hover{ background:var(--accent-2); }
+  .btn.ghost{ border-color:var(--border); background:var(--card); }
+  .btn.ghost:hover{ background:var(--bg); }
+  .btn.danger{ color:var(--danger); border-color:transparent; }
+  .btn.danger:hover{ background:#fbeae7; }
+  .btn.sm{ font-size:12.5px; padding:6px 10px; border-radius:8px; }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+  /* Periodo */
+  .month-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .month-row input[type=date]{ font:inherit; font-size:15px; font-weight:600; color:var(--text); border:1px solid var(--border); border-radius:10px; padding:8px 12px; background:#fff; outline:none; }
+  .month-row input[type=date]:focus{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(217,101,63,.15); }
+  .week-group{ margin-bottom:12px; }
+  .week-group:last-child{ margin-bottom:0; }
+  .week-label{ font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 6px; }
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--bg); border:1px solid var(--border); border-radius:999px;
+    padding:4px 10px; font-size:12.5px; color:var(--text);
+  }
+  .chip-off{ opacity:.55; }
+  .chip-off .chip-note{ font-style:italic; color:var(--muted); }
+  .add-row{ display:flex; gap:8px; margin-top:14px; }
+  .add-row input{ flex:1; min-width:0; }
+
+  /* Inputs */
+  input[type=text]{
+    font:inherit; font-size:14px; color:var(--text);
+    border:1px solid var(--border); border-radius:10px; padding:8px 12px;
+    background:#fff; outline:none; transition:.15s; width:100%;
+  }
+  input[type=text]:focus{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(217,101,63,.15); }
+  select{
+    font:inherit; font-size:14px; color:var(--text);
+    border:1px solid var(--border); border-radius:10px; padding:8px 12px;
+    background:#fff; outline:none; width:100%;
+  }
+  select:focus{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(217,101,63,.15); }
+
+  /* Lists */
+  .list{ display:flex; flex-direction:column; gap:10px; }
+  .item{
+    border:1px solid var(--border); border-radius:14px; padding:12px 14px; background:#fff;
+    display:flex; flex-direction:column; gap:8px; transition:.15s;
+  }
+  .item:hover{ box-shadow:var(--shadow); border-color:#ddd0c2; }
+  .item-main{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .item-name{ font-weight:600; font-size:14.5px; }
+  .item-tags{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .item-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .item-meta{ font-size:12px; color:var(--muted); }
+  .item-actions{ display:flex; gap:4px; margin-top:2px; }
+  .switch{ position:relative; display:inline-flex; width:36px; height:21px; flex-shrink:0; cursor:pointer; }
+  .switch input{ position:absolute; opacity:0; width:0; height:0; }
+  .switch .slider{ position:absolute; inset:0; background:#cfd6dd; border-radius:21px; transition:background .15s; }
+  .switch .slider:before{ content:''; position:absolute; width:17px; height:17px; left:2px; top:2px; background:#fff; border-radius:50%; transition:transform .15s; box-shadow:0 1px 2px rgba(0,0,0,.25); }
+  .switch input:checked + .slider{ background:var(--accent); }
+  .switch input:checked + .slider:before{ transform:translateX(15px); }
+  .item.disabled{ opacity:.55; }
+  .item.disabled .item-name{ text-decoration:line-through; }
+  .item-date{ display:flex; align-items:center; gap:8px; }
+  .date-label{ font-size:12px; color:var(--muted); flex-shrink:0; }
+  .date-select{ flex:1; min-width:0; padding:5px 8px; border:1px solid var(--border); border-radius:8px; font-size:13px; background:#fff; color:var(--text); font-family:inherit; }
+  .date-select:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(217,101,63,.15); }
+  .mini-fixed{ background:#efe6fb; color:#7a4fc2; border-color:#dccdf6; font-weight:600; }
+  .icon-btn{
+    border:none; background:none; cursor:pointer; color:var(--muted);
+    width:30px; height:30px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; transition:.15s;
+  }
+  .icon-btn:hover{ background:var(--bg); color:var(--text); }
+  .icon-btn.danger:hover{ background:#fbeae7; color:var(--danger); }
+  .icon-btn svg{ display:block; }
+
+  /* Badges */
+  .badge{ font-size:11.5px; font-weight:700; border-radius:999px; padding:2px 9px; display:inline-flex; align-items:center; gap:4px; }
+  .badge-ministrante{ background:var(--ministrante-bg); color:var(--ministrante); }
+  .badge-normale{ background:var(--normale-bg); color:var(--normale); }
+  .badge-car{ background:var(--bg); color:var(--muted); border:1px solid var(--border); font-weight:600; }
+  .badge-outside{ background:#fbeae7; color:var(--danger); }
+  .badge-coppia{ background:#efe6fb; color:#7a4fc2; }
+  .badge-pausa{ background:#fff4e0; color:#a9761a; border:1px solid #f0d79b; }
+  .mini-avail{ font-size:11.5px; color:var(--muted); background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:1px 6px; }
+
+  .empty, .hint{ color:var(--muted); font-size:13px; margin:4px 0; }
+
+  /* Results */
+  .stale-banner{
+    background:#fdf3dd; color:#8a6413; border:1px solid #f0d79b;
+    border-radius:12px; padding:10px 14px; font-size:13px; margin-bottom:14px;
+  }
+  .summary{ font-weight:600; font-size:14px; margin:0 0 12px; }
+  .results-list{ display:flex; flex-direction:column; gap:12px; }
+  .result-item{
+    border:1px solid var(--border); border-radius:14px; padding:12px 14px; background:#fff;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .result-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .result-name{ font-weight:700; font-size:14.5px; }
+  .result-enc{ border-top:1px dashed var(--border); padding-top:8px; display:flex; flex-direction:column; gap:6px; }
+  .result-date{ font-size:12.5px; font-weight:700; color:var(--accent-2); }
+  .result-people{ display:flex; gap:8px; flex-wrap:wrap; }
+  .result-people .badge{ font-size:13px; padding:4px 12px; }
+  .result-badges{ display:flex; gap:8px; flex-wrap:wrap; }
+  .warn-badge{ font-size:11.5px; color:var(--danger); background:#fbeae7; border-radius:999px; padding:2px 9px; font-weight:600; }
+  .missed .result-date{ color:var(--muted); }
+  .unmatched-reason{ font-size:13px; color:var(--muted); }
+  .visitor-status{ margin-top:16px; padding-top:14px; border-top:1px dashed var(--border); }
+
+  /* Modal */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(40,28,20,.45); z-index:50;
+    display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .modal{
+    background:var(--card); border-radius:18px; max-width:600px; width:100%;
+    max-height:90vh; overflow:auto; padding:20px 22px;
+    box-shadow:0 24px 60px rgba(0,0,0,.28);
+  }
+  .modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .modal-head h3{ margin:0; font-size:17px; }
+  .modal-close{ border:none; background:none; cursor:pointer; font:inherit; font-size:24px; line-height:1; color:var(--muted); width:32px; height:32px; border-radius:8px; }
+  .modal-close:hover{ background:var(--bg); color:var(--text); }
+  .modal form label{ display:block; font-size:13px; font-weight:600; margin:12px 0 6px; }
+  .modal form fieldset{ border:1px solid var(--border); border-radius:12px; padding:10px 12px; margin:12px 0 0; }
+  .modal form legend{ font-size:12.5px; font-weight:700; padding:0 6px; color:var(--muted); }
+  .modal-foot{ display:flex; justify-content:flex-end; gap:8px; margin-top:20px; }
+  .check{ display:flex; align-items:center; gap:8px; font-weight:600; cursor:pointer; }
+  .check input{ width:16px; height:16px; accent-color:var(--accent); }
+  .avail-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:6px; }
+  .pill{
+    position:relative; display:flex; align-items:center; gap:6px;
+    border:1px solid var(--border); border-radius:999px; padding:5px 10px;
+    font-size:12.5px; font-weight:500; cursor:pointer; user-select:none;
+    background:#fff; transition:.15s;
+  }
+  .pill input{ position:absolute; opacity:0; pointer-events:none; }
+  .pill:has(input:checked){ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .seg{ display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; }
+  .seg-btn{ position:relative; padding:7px 16px; font-size:13px; font-weight:600; cursor:pointer; color:var(--muted); }
+  .seg-btn input{ position:absolute; opacity:0; pointer-events:none; }
+  .seg-btn:has(input:checked){ background:var(--accent); color:#fff; }
+
+  footer{ max-width:1080px; margin:0 auto; padding:0 20px 40px; color:var(--muted); font-size:12.5px; }
+
+  /* Vista stampabile / PDF */
+  #print-area{ display:none; }
+  @media print{
+    body > *{ display:none !important; }
+    #print-area{ display:block !important; font-family:Georgia,'Times New Roman',serif; color:#111; padding:0 4px; }
+    #print-area .pa-header{ border-bottom:3px solid #d9653f; padding-bottom:10px; margin-bottom:14px; }
+    #print-area .pa-title{ font-size:22px; font-weight:700; }
+    #print-area .pa-month{ font-size:14px; color:#555; margin-top:2px; }
+    #print-area .pa-summary{ font-size:13px; margin:10px 0 18px; color:#333; }
+    #print-area .pa-grid{ width:100%; border-collapse:collapse; font-size:12.5px; margin-top:4px; }
+    #print-area .pa-grid th, #print-area .pa-grid td{ border:1px solid #cfc6ba; padding:7px 9px; text-align:left; vertical-align:top; }
+    #print-area .pa-grid th{ background:#f2ece2; font-size:11.5px; font-weight:700; }
+    #print-area .pa-grid .pa-date-col{ white-space:nowrap; font-weight:600; }
+    #print-area .pa-grid .pa-person-col{ font-weight:600; }
+    #print-area .pa-note{ font-size:12.5px; margin-top:14px; color:#333; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+      </div>
+      <div>
+        <h1>OrganizzaVisite</h1>
+        <p class="tagline">Programma gli incontri del periodo: 1 ministrante e 2 visitatori, una volta a persona</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn ghost sm" data-action="export">Esporta dati</button>
+      <button class="btn ghost sm" data-action="print">Esporta PDF</button>
+      <button class="btn ghost sm" data-action="import">Importa dati</button>
+      <button class="btn ghost danger sm" data-action="reset-all">Pulisci tutto</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Periodo -->
+  <section class="card">
+    <div class="section-head">
+      <h2>Periodo <span class="count" id="month-count"></span></h2>
+    </div>
+    <div class="month-row">
+      <label class="date-label" for="range-start">Dal</label>
+      <input type="date" id="range-start">
+      <label class="date-label" for="range-end">Al</label>
+      <input type="date" id="range-end">
+    </div>
+    <div id="slots-list" style="margin-top:14px"></div>
+  </section>
+
+  <!-- Liste -->
+  <div class="columns">
+    <section class="card">
+      <div class="section-head">
+        <h2>Visitatori <span class="count" id="visitor-count"></span></h2>
+        <button class="btn accent sm" data-action="add-visitor">+ Aggiungi visitatore</button>
+      </div>
+      <div class="list" id="visitor-list"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Persone da visitare <span class="count" id="visit-count"></span></h2>
+        <button class="btn accent sm" data-action="add-visit">+ Aggiungi persona</button>
+      </div>
+      <div class="list" id="visit-list"></div>
+    </section>
+  </div>
+
+  <!-- Risultati -->
+  <section class="card">
+    <div class="section-head">
+      <h2>Abbinamenti</h2>
+      <div class="head-actions">
+        <button class="btn ghost sm" data-action="clear-results">Cancella risultati</button>
+        <button class="btn accent" data-action="calc">Calcola abbinamenti</button>
+      </div>
+    </div>
+    <div id="results"></div>
+  </section>
+</main>
+
+<footer>I dati restano salvati in questo browser (localStorage). Usa "Esporta dati" per una copia di sicurezza.</footer>
+
+<input type="file" id="import-input" accept=".json,application/json" hidden>
+
+<!-- Contenuto stampabile / PDF -->
+<div id="print-area"></div>
+
+<!-- Modale -->
+<div class="modal-backdrop" id="modal" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title"></h3>
+      <button class="modal-close" data-action="close-modal" aria-label="Chiudi">×</button>
+    </div>
+    <form id="modal-form">
+      <div id="modal-body"></div>
+      <div class="modal-foot">
+        <button type="button" class="btn ghost" data-action="close-modal">Annulla</button>
+        <button type="submit" class="btn accent" id="modal-save">Salva</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   OM — logica pura (nessun accesso al DOM). Testabile con Node.
+   ===================================================================== */
+const OM = (function(){
+  const WEEKDAYS = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+  const MONTHS = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+  function ymd(d){ return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function shiftMY(my, delta){
+    const y = parseInt(my.slice(0, 4), 10), m = parseInt(my.slice(5, 7), 10) - 1;
+    const d = new Date(y, m + delta, 1);
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1);
+  }
+
+  // Tutti i giorni lun-ven del mese (anno, mese 0-based).
+  function slotsForMonth(year, month0){
+    const out = [];
+    const days = new Date(year, month0 + 1, 0).getDate();
+    for (let d = 1; d <= days; d++){
+      const dt = new Date(year, month0, d);
+      const dow = dt.getDay();
+      if (dow === 0 || dow === 6) continue;
+      const id = ymd(dt);
+      const label = WEEKDAYS[dow] + ' ' + d + ' ' + MONTHS[month0];
+      const mon = new Date(dt);
+      mon.setDate(dt.getDate() - ((dow + 6) % 7)); // lunedì della settimana
+      out.push({ id: id, label: label, week: ymd(mon), dow: dow });
+    }
+    return out;
+  }
+
+  // Tutti i giorni lun-ven compresi tra due date (incluse). start > end → nessuno slot.
+  function slotsInRange(startYmd, endYmd){
+    const out = [];
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(startYmd) || !/^\d{4}-\d{2}-\d{2}$/.test(endYmd)) return out;
+    const toDate = s => { const p = s.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); };
+    const end = toDate(endYmd);
+    for (let cur = toDate(startYmd); cur <= end; cur.setDate(cur.getDate() + 1)){
+      const dow = cur.getDay();
+      if (dow === 0 || dow === 6) continue;
+      const id = ymd(cur);
+      const label = WEEKDAYS[dow] + ' ' + cur.getDate() + ' ' + MONTHS[cur.getMonth()];
+      const mon = new Date(cur);
+      mon.setDate(cur.getDate() - ((dow + 6) % 7)); // lunedì della settimana
+      out.push({ id: id, label: label, week: ymd(mon), dow: dow });
+    }
+    return out;
+  }
+
+  // Disponibilità di una persona da visitare: date singole; se vuote → sempre disponibile.
+  function isAvailVisit(p, sid){
+    return !(p.avail && p.avail.length) || p.avail.includes(sid);
+  }
+
+  // Disponibilità di un visitatore: unione di date singole (avail) e giorni feriali settimanali
+  // (weekly, 1..5 = lun..ven). Se entrambi vuoti → sempre disponibile.
+  function isAvailVisitor(v, slot){
+    if (slot == null) return false;
+    const hasAny = (v.avail && v.avail.length) || (v.weekly && v.weekly.length);
+    if (!hasAny) return true;
+    return (v.avail && v.avail.includes(slot.id)) || (v.weekly && v.weekly.includes(slot.dow));
+  }
+
+  // Una persona si visita UNA volta al mese: un solo incontro con tutte le date disponibili.
+  // Se p.date è una data valida del mese, la persona va visitata SOLO quel giorno (scelta a mano).
+  // In automatico si saltano i giorni precedenti a notBefore (= oggi): niente assegnazioni nel passato.
+  function buildEncounters(visits, slots, notBefore){
+    const bySlot = {};
+    for (const s of slots) bySlot[s.id] = s;
+    const encounters = [];
+    for (const p of visits){
+      const dates = (p.date && bySlot[p.date])
+        ? [p.date]
+        : slots.filter(s => isAvailVisit(p, s.id) && (!notBefore || s.id >= notBefore)).map(s => s.id);
+      encounters.push({ personId: p.id, person: p, dates: dates });
+    }
+    return encounters;
+  }
+
+  // Unità indivisibili: singletons e coppie mutue (v.pair = p.id e p.pair = v.id).
+  // Una coppia di 2 ministranti è impossibile (servirebbe 1M+2N) → trattata come singletons.
+  function buildUnits(visitors){
+    const byId = {};
+    for (const v of visitors) byId[v.id] = v;
+    const paired = new Set();
+    for (const v of visitors){
+      const p = v.pair ? byId[v.pair] : null;
+      if (p && p.pair === v.id) paired.add(v.id);
+    }
+    const units = [];
+    const singleton = v => units.push({ members: [v], kind: v.type === 'ministrante' ? 'M' : 'N' });
+    for (const v of visitors){
+      if (!paired.has(v.id)){ singleton(v); continue; }
+      const p = byId[v.pair];
+      if (v.id < v.pair){ // elabora ogni coppia mutua una sola volta
+        if (v.type === 'ministrante' && p.type === 'ministrante'){
+          singleton(v); singleton(p);
+        } else if (v.type === 'normale' && p.type === 'normale'){
+          units.push({ members: [v, p], kind: 'NN' });
+        } else {
+          const m = v.type === 'ministrante' ? v : p;
+          const n = v.type === 'ministrante' ? p : v;
+          units.push({ members: [m, n], kind: 'MN' });
+        }
+      }
+    }
+    return units;
+  }
+
+  // Un gruppo valido (1 ministrante + 2 normali) esiste da queste unità?
+  function hasGroup(unitsAvail){
+    let mS = 0, nS = 0, mn = 0, nn = 0;
+    for (const u of unitsAvail){
+      if (u.kind === 'M') mS++;
+      else if (u.kind === 'N') nS++;
+      else if (u.kind === 'MN') mn++;
+      else nn++;
+    }
+    if (mS >= 1 && nS >= 2) return true;
+    if (mn >= 1 && nS >= 1) return true;
+    if (nn >= 1 && mS >= 1) return true;
+    return false;
+  }
+
+  function structuralReason(enc, units, slotByDate){
+    const availAt = sid => units.filter(u => u.members.every(m => isAvailVisitor(m, slotByDate[sid])));
+    for (const sid of enc.dates){
+      if (hasGroup(availAt(sid))) return null;
+    }
+    let hasM = false, hasN2 = false;
+    for (const sid of enc.dates){
+      const avail = availAt(sid);
+      if (avail.some(u => u.kind === 'M' || u.kind === 'MN')) hasM = true;
+      const nCnt = avail.reduce((s, u) => s + (u.kind === 'N' ? 1 : (u.kind === 'MN' ? 1 : (u.kind === 'NN' ? 2 : 0))), 0);
+      if (nCnt >= 2) hasN2 = true;
+    }
+    if (!hasM) return 'Nessun ministrante disponibile';
+    if (!hasN2) return 'Meno di 2 visitatori normali disponibili';
+    return 'Coppie di visitatori non compatibili con le date disponibili';
+  }
+
+  // Sceglie fino a K gruppi privilegiando coppie di normali NUOVI (non ancora scelti),
+  // poi con almeno un normale nuovo, poi riempiendo. Così il cap non si riempie con le
+  // stesse persone e restano candidate le coppie "fresche" per bilanciare i carichi.
+  function diversePick(arr, K){
+    arr.sort((a, b) => b._score - a._score);
+    const cnt = new Map();
+    const sel = [];
+    const c = id => cnt.get(id) || 0;
+    const take = g => { sel.push(g); cnt.set(g.normals[0], c(g.normals[0]) + 1); cnt.set(g.normals[1], c(g.normals[1]) + 1); };
+    for (const g of arr){ if (sel.length >= K) break; if (c(g.normals[0]) === 0 && c(g.normals[1]) === 0) take(g); }
+    for (const g of arr){
+      if (sel.length >= K) break;
+      if (sel.indexOf(g) === -1 && (c(g.normals[0]) === 0 || c(g.normals[1]) === 0) && c(g.normals[0]) < 2 && c(g.normals[1]) < 2) take(g);
+    }
+    for (const g of arr){ if (sel.length >= K) break; if (sel.indexOf(g) === -1) take(g); }
+    return sel;
+  }
+
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function greedyRun(pre, rand){
+    const dateUsage = {};  // date -> Set(vid) (stesso visitatore non doppio sulla stessa data)
+    const load = {};       // vid -> numero di incarichi
+    const assigned = [];
+    const remaining = pre.slice();
+
+    function hardFeasible(entry){
+      const out = [];
+      for (const g of entry.groups){
+        const du = dateUsage[g.date];
+        if (du && (du.has(g.minister) || du.has(g.normals[0]) || du.has(g.normals[1]))) continue;
+        out.push(g);
+      }
+      return out;
+    }
+
+    while (remaining.length){
+      // MRV: encounter con meno candidati hard-feasible (tie casuale)
+      let bi = 0, bc = Infinity;
+      for (let i = 0; i < remaining.length; i++){
+        const c = hardFeasible(remaining[i]).length;
+        if (c < bc || (c === bc && rand() < 0.4)){ bc = c; bi = i; }
+      }
+      const entry = remaining[bi];
+      remaining.splice(bi, 1);
+      const hf = hardFeasible(entry);
+      if (!hf.length) continue;
+
+      let chosen = null, chosenLevel = 0;
+      // Livelli 5→1, dal più stretto al solo hard.
+      for (let lvl = 5; lvl >= 1; lvl--){
+        const cand = [];
+        for (const g of hf){
+          if (lvl >= 2 && !g.constantOk) continue;
+          if (lvl >= 4 && !g.excludeOk) continue;
+          if (lvl === 5 && !g.carOk) continue;
+          cand.push(g);
+        }
+        if (cand.length){
+          let bg = null, bs = -Infinity, brp = Infinity, blmax = Infinity, blsum = Infinity;
+          for (const g of cand){
+            const score = (g.constantOk ? 4 : 0) + (g.excludeOk ? 2 : 0) + (g.carOk ? 1 : 0);
+            const rp = (g.repN || 0) * 2 + (g.repM || 0); // normali ripetuti pesano più dei ministranti
+            const l0 = load[g.minister] || 0, l1 = load[g.normals[0]] || 0, l2 = load[g.normals[1]] || 0;
+            const lmax = Math.max(l0, l1, l2);      // non spremere chi ha già più incarichi
+            const lsum = l0 + l1 + l2;
+            if (score > bs ||
+                (score === bs && rp < brp) ||
+                (score === bs && rp === brp && (lmax < blmax || (lmax === blmax && lsum < blsum)))){
+              bg = g; bs = score; brp = rp; blmax = lmax; blsum = lsum;
+            }
+          }
+          chosen = bg;
+          chosenLevel = lvl;
+          break;
+        }
+      }
+
+      if (chosen){
+        const ids = [chosen.minister, chosen.normals[0], chosen.normals[1]];
+        const du = dateUsage[chosen.date] = dateUsage[chosen.date] || new Set();
+        for (const id of ids) du.add(id);
+        for (const id of ids) load[id] = (load[id] || 0) + 1;
+        assigned.push({
+          entry: entry, group: chosen,
+          flags: { constantOk: chosen.constantOk, excludeOk: chosen.excludeOk, carOk: chosen.carOk },
+          level: chosenLevel
+        });
+      }
+    }
+    return assigned;
+  }
+
+  function solve(args, opts){
+    opts = opts || {};
+    const seed = (opts.seed != null) ? opts.seed : Math.floor(Math.random() * 2147483647);
+    const rand = mulberry32(seed);
+    const range = args.range || {};
+    const slots = slotsInRange(range.start, range.end);
+    const history = args.history || {};
+    const baseMY = (typeof range.start === 'string') ? range.start.slice(0, 7) : '';
+    const prevMonths = [shiftMY(baseMY, -1), shiftMY(baseMY, -2)];
+    // Chi è "in pausa" (switch spento) è escluso dai gruppi ma resta in lista.
+    const visitors = (args.visitors || []).filter(v => v.enabled !== false);
+    const visits = (args.visits || []).filter(p => p.enabled !== false);
+    const byVisitor = {};
+    for (const v of visitors) byVisitor[v.id] = v;
+    const slotByDate = {};
+    for (const s of slots) slotByDate[s.id] = s;
+    // In automatico niente date passate: si parte da oggi (o da args.notBefore, per i test).
+    const notBefore = (typeof args.notBefore === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(args.notBefore))
+      ? args.notBefore : ymd(new Date());
+    const encounters = buildEncounters(visits, slots, notBefore);
+    const units = buildUnits(visitors);
+
+    // Precomputo candidati per encounter (con cap per performance).
+    // Gruppi = 1 ministrante + 2 normali composti da unità: A) 3 singletons,
+    // B) coppia MN + singleton N, C) coppia NN + singleton M.
+    const pre = encounters.map(enc => {
+      const p = enc.person;
+      const E = new Set(p.exclude || []);
+      const C = new Set(p.constants || []);
+      // Visitatori che hanno visitato p nei 2 mesi precedenti; i costanti fanno eccezione.
+      const repeatSet = new Set();
+      const repeatMonths = {};
+      for (const pm of prevMonths){
+        const entry = history[pm] && history[pm][p.id];
+        if (!Array.isArray(entry)) continue;
+        for (const id of entry){
+          if (C.has(id)) continue;
+          if (!repeatSet.has(id)){ repeatSet.add(id); repeatMonths[id] = []; }
+          if (!repeatMonths[id].includes(pm)) repeatMonths[id].push(pm);
+        }
+      }
+      const isRepeat = id => repeatSet.has(id);
+      const groups = [];
+      const pushGroup = (minister, n1, n2, sid) => {
+        const ids = [minister, n1, n2];
+        const excludeOk = ids.every(id => !E.has(id));
+        const carOk = !p.outside || ids.some(id => byVisitor[id].car);
+        const constantOk = !(p.constants && p.constants.length) || ids.some(id => C.has(id));
+        const repM = isRepeat(minister) ? 1 : 0;
+        const repN = (isRepeat(n1) ? 1 : 0) + (isRepeat(n2) ? 1 : 0);
+        groups.push({ date: sid, minister: minister, normals: [n1, n2],
+                      constantOk: constantOk, excludeOk: excludeOk, carOk: carOk,
+                      repM: repM, repN: repN,
+                      _score: (constantOk ? 4 : 0) + (excludeOk ? 2 : 0) + (carOk ? 1 : 0) });
+      };
+      for (const sid of enc.dates){
+        const avail = units.filter(u => u.members.every(m => isAvailVisitor(m, slotByDate[sid])));
+        const mS = avail.filter(u => u.kind === 'M');
+        const nS = avail.filter(u => u.kind === 'N');
+        const mn = avail.filter(u => u.kind === 'MN');
+        const nn = avail.filter(u => u.kind === 'NN');
+        for (const mu of mS){
+          for (let i = 0; i < nS.length; i++){
+            for (let j = i + 1; j < nS.length; j++){
+              pushGroup(mu.members[0].id, nS[i].members[0].id, nS[j].members[0].id, sid);
+            }
+          }
+        }
+        for (const pu of mn){
+          for (const nu of nS){
+            pushGroup(pu.members[0].id, pu.members[1].id, nu.members[0].id, sid);
+          }
+        }
+        for (const pu of nn){
+          for (const mu of mS){
+            pushGroup(mu.members[0].id, pu.members[0].id, pu.members[1].id, sid);
+          }
+        }
+      }
+      // Cap per (DATA + MINISTRANTE): un cap solo per data terrebbe, a parità di punteggio,
+      // i primi gruppi inseriti → tutti con un unico ministrante (gli altri mai usati) e
+      // le stesse persone "spremute". Raggruppando anche per ministrante e scegliendo coppie
+      // di normali diverse, ogni ministrante resta candidato su ogni giorno e il
+      // bilanciamento può distribuire gli incarichi.
+      const byKey = new Map();
+      for (const g of groups){
+        const key = g.date + '|' + g.minister;
+        if (!byKey.has(key)) byKey.set(key, []);
+        byKey.get(key).push(g);
+      }
+      const capped = [];
+      const perKey = 8;
+      for (const arr of byKey.values()){
+        for (const g of diversePick(arr, perKey)) capped.push(g);
+      }
+      const reason = (groups.length === 0)
+        ? (enc.dates.length === 0
+            ? 'Nessuna data utile nel mese (giorni già passati o nessuna disponibilità)'
+            : structuralReason(enc, units, slotByDate))
+        : null;
+      return { enc: enc, groups: capped, reason: reason, repeatMonths: repeatMonths };
+    });
+
+    const possible = pre.length;
+
+    // Restart randomizzati; migliore per (count, totalFlags)
+    let best = null;
+    const maxRuns = opts.maxRuns || 100;
+    const budgetMs = opts.budgetMs || 1800;
+    const start = Date.now();
+    for (let r = 0; r < maxRuns && Date.now() - start < budgetMs; r++){
+      const assigned = greedyRun(pre, rand);
+      const count = assigned.length;
+      let totalFlags = 0, totalRepeat = 0;
+      const loads = {};
+      for (const a of assigned){
+        totalFlags += (a.flags.constantOk ? 4 : 0) + (a.flags.excludeOk ? 2 : 0) + (a.flags.carOk ? 1 : 0);
+        totalRepeat += (a.group.repN || 0) * 2 + (a.group.repM || 0);
+        for (const id of [a.group.minister, a.group.normals[0], a.group.normals[1]]) loads[id] = (loads[id] || 0) + 1;
+      }
+      // Equilibrio: meno incarichi massimi a una sola persona (poi distribuzione complessiva).
+      let maxLoad = 0, sumSq = 0;
+      for (const id in loads){ const L = loads[id]; if (L > maxLoad) maxLoad = L; sumSq += L * L; }
+      const better = !best || count > best.count ||
+        (count === best.count && (
+          totalFlags > best.totalFlags ||
+          (totalFlags === best.totalFlags && (
+            totalRepeat < best.totalRepeat ||
+            (totalRepeat === best.totalRepeat &&
+              (maxLoad < best.maxLoad || (maxLoad === best.maxLoad && sumSq < best.sumSq)))
+          ))
+        ));
+      if (better) best = { assigned: assigned, count: count, totalFlags: totalFlags, totalRepeat: totalRepeat, maxLoad: maxLoad, sumSq: sumSq };
+    }
+    if (!best) best = { assigned: [], count: 0, totalFlags: 0, totalRepeat: 0, maxLoad: 0, sumSq: 0 };
+
+    const encountersMap = {};
+    const missedMap = {};
+    for (const a of best.assigned){
+      const id = a.entry.enc.personId;
+      const rep = [];
+      const rm = a.entry.repeatMonths || {};
+      for (const vid of [a.group.minister, a.group.normals[0], a.group.normals[1]]){
+        if (rm[vid]) rep.push({ id: vid, months: rm[vid] });
+      }
+      (encountersMap[id] = encountersMap[id] || []).push({
+        date: a.group.date,
+        minister: a.group.minister, normals: a.group.normals,
+        flags: a.flags, level: a.level, repeats: rep
+      });
+    }
+    for (const k in encountersMap) encountersMap[k].sort((a, b) => a.date < b.date ? -1 : (a.date > b.date ? 1 : 0));
+    const assignedKeys = new Set(best.assigned.map(a => a.entry.enc.personId));
+    for (const pr of pre){
+      if (assignedKeys.has(pr.enc.personId)) continue;
+      (missedMap[pr.enc.personId] = missedMap[pr.enc.personId] || []).push({
+        reason: pr.reason || 'Visitatori già impegnati su quelle date'
+      });
+    }
+
+    return {
+      encounters: encountersMap, missed: missedMap,
+      count: best.count, totalFlags: best.totalFlags, possible: possible
+    };
+  }
+
+  return { slotsForMonth: slotsForMonth, slotsInRange: slotsInRange, buildEncounters: buildEncounters, solve: solve };
+})();
+</script>
+
+<script>
+/* =====================================================================
+   UI — stato, persistenza, rendering ed eventi.
+   ===================================================================== */
+(function(){
+  const STORAGE_KEY = 'organizerMamma.v3';
+  const MONTHS_IT = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+  const WEEKDAYS_IT = ['Domenica','Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato'];
+
+  let uidCounter = 0;
+  function uid(){
+    uidCounter++;
+    return 'id_' + Date.now().toString(36) + '_' + uidCounter.toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+  }
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+
+  function lastDayOfMonth(y, m0){ return new Date(y, m0 + 1, 0).getDate(); }
+  function currentRange(){
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth();
+    return { start: y + '-' + pad2(m + 1) + '-01', end: y + '-' + pad2(m + 1) + '-' + pad2(lastDayOfMonth(y, m)) };
+  }
+  function rangeFromMonth(my){
+    const y = parseInt(my.slice(0, 4), 10), m = parseInt(my.slice(5, 7), 10) - 1;
+    return { start: my + '-01', end: my + '-' + pad2(lastDayOfMonth(y, m)) };
+  }
+  function defaultState(){
+    return { range: currentRange(), visitors: [], visits: [], assignment: null, assignmentStale: false, history: {} };
+  }
+  function isValidYmd(s){ return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s); }
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw){
+        const s = JSON.parse(raw);
+        if (s && Array.isArray(s.visitors) && Array.isArray(s.visits)){
+          // Migrazione dal vecchio formato "mese" a intervallo, o valore di default.
+          if (!s.range || !isValidYmd(s.range.start) || !isValidYmd(s.range.end)){
+            s.range = (typeof s.monthYear === 'string' && /^\d{4}-\d{2}$/.test(s.monthYear))
+              ? rangeFromMonth(s.monthYear) : currentRange();
+          }
+          delete s.monthYear;
+          if (!s.history || typeof s.history !== 'object' || Array.isArray(s.history)) s.history = {};
+          (s.visitors || []).forEach(v => { if (v.enabled === undefined) v.enabled = true; });
+          (s.visits || []).forEach(p => { if (typeof p.date !== 'string') p.date = null; if (p.enabled === undefined) p.enabled = true; });
+          return s;
+        }
+      }
+    }catch(e){}
+    return defaultState();
+  }
+
+  let state = load();
+  function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+
+  /* ---------- derivati ---------- */
+  function periodSlots(){
+    return OM.slotsInRange(state.range.start, state.range.end);
+  }
+  function slotLabelOf(id){
+    const s = periodSlots().find(x => x.id === id);
+    return s ? s.label : id;
+  }
+  function weekLabel(wk){
+    const parts = wk.split('-');
+    const d = parseInt(parts[2], 10), m = parseInt(parts[1], 10);
+    return d + ' ' + MONTHS_IT[m - 1];
+  }
+  function groupSlotsByWeek(slots){
+    const map = new Map();
+    for (const s of slots){
+      if (!map.has(s.week)) map.set(s.week, []);
+      map.get(s.week).push(s);
+    }
+    return map;
+  }
+
+  /* ---------- helpers ---------- */
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function visitorById(id){ return state.visitors.find(v => v.id === id); }
+  function markStale(){ state.assignmentStale = true; }
+
+  const ICON_EDIT = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>';
+  const ICON_TRASH = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+  const ICON_CAR = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3v-5l2-5h9l4 5v5h-2"/><circle cx="7.5" cy="17" r="1.4"/><circle cx="16.5" cy="17" r="1.4"/><path d="M3 12h16"/></svg>';
+
+  function dateChips(x){
+    const weekly = (x.weekly || []).filter(d => d >= 1 && d <= 5).sort((a, b) => a - b)
+      .map(d => '<span class="mini-avail">Ogni ' + WEEKDAYS_IT[d] + '</span>').join('');
+    const avail = (x.avail || []).slice().sort()
+      .map(id => '<span class="mini-avail">' + esc(slotLabelOf(id)) + '</span>').join('');
+    if (!weekly && !avail) return '<span class="mini-avail">Sempre disponibile</span>';
+    return weekly + avail;
+  }
+
+  /* ---------- render ---------- */
+  function renderPeriod(){
+    const startEl = document.getElementById('range-start');
+    const endEl = document.getElementById('range-end');
+    if (startEl) startEl.value = state.range.start;
+    if (endEl) endEl.value = state.range.end;
+    const slots = periodSlots();
+    document.getElementById('month-count').textContent = slots.length + ' giorni';
+    const el = document.getElementById('slots-list');
+    const byWeek = groupSlotsByWeek(slots);
+    if (!slots.length){
+      el.innerHTML = '<p class="hint">Il periodo selezionato non ha giorni feriali.</p>';
+      return;
+    }
+    let html = '';
+    for (const [wk, arr] of byWeek){
+      html += '<div class="week-group"><div class="week-label">Settimana del ' + esc(weekLabel(wk)) + '</div><div class="chips">';
+      html += arr.map(s => '<span class="chip">' + esc(s.label) + '</span>').join('');
+      html += '</div></div>';
+    }
+    el.innerHTML = html;
+  }
+
+  function renderVisitors(){
+    const el = document.getElementById('visitor-list');
+    document.getElementById('visitor-count').textContent = state.visitors.length;
+    if (!state.visitors.length){ el.innerHTML = '<p class="empty">Nessun visitatore. Aggiungine uno.</p>'; return; }
+    el.innerHTML = state.visitors.map(v => {
+      const typeBadge = v.type === 'ministrante'
+        ? '<span class="badge badge-ministrante">Ministrante</span>'
+        : '<span class="badge badge-normale">Normale</span>';
+      const car = v.car ? '<span class="badge badge-car">' + ICON_CAR + ' Vettura</span>' : '';
+      const partner = v.pair ? visitorById(v.pair) : null;
+      const pairBadge = partner ? '<span class="badge badge-coppia">Coppia con ' + esc(partner.name) + '</span>' : '';
+      const enabled = v.enabled !== false;
+      const switchHtml =
+        '<label class="switch" title="In pausa: non verrà usato finché non lo riattivi">' +
+          '<input type="checkbox" data-action="toggle-visitor" data-id="' + v.id + '"' + (enabled ? ' checked' : '') + '>' +
+          '<span class="slider"></span>' +
+        '</label>';
+      const pauseBadge = enabled ? '' : '<span class="badge badge-pausa">In pausa</span>';
+      return (
+        '<div class="item' + (enabled ? '' : ' disabled') + '">' +
+          '<div class="item-main">' +
+            '<span class="item-name">' + esc(v.name) + '</span>' +
+            switchHtml +
+          '</div>' +
+          '<div class="item-tags">' + typeBadge + car + pairBadge + pauseBadge + '</div>' +
+          '<div class="item-chips">' + dateChips(v) + '</div>' +
+          '<div class="item-actions">' +
+            '<button class="icon-btn" data-action="edit-visitor" data-id="' + v.id + '" aria-label="Modifica">' + ICON_EDIT + '</button>' +
+            '<button class="icon-btn danger" data-action="del-visitor" data-id="' + v.id + '" aria-label="Elimina">' + ICON_TRASH + '</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function renderVisits(){
+    const el = document.getElementById('visit-list');
+    document.getElementById('visit-count').textContent = state.visits.length;
+    if (!state.visits.length){ el.innerHTML = '<p class="empty">Nessuna persona da visitare. Aggiungine una.</p>'; return; }
+    const slots = periodSlots();
+    const slotIds = new Set(slots.map(s => s.id));
+    el.innerHTML = state.visits.map(p => {
+      const outside = p.outside ? '<span class="badge badge-outside">Fuori centro</span>' : '';
+      const meta = [
+        'Costanti: ' + (p.constants || []).length,
+        'Non possono visitare: ' + (p.exclude || []).length
+      ].join(' · ');
+      const fixed = !!(p.date && slotIds.has(p.date));
+      const paused = p.enabled === false;
+      const pauseBadge = paused ? '<span class="badge badge-pausa">In pausa</span>' : '';
+      const switchHtml =
+        '<label class="switch" title="In pausa: non verrà visitata finché non la riattivi">' +
+          '<input type="checkbox" data-action="toggle-visit" data-id="' + p.id + '"' + (paused ? '' : ' checked') + '>' +
+          '<span class="slider"></span>' +
+        '</label>';
+      const dateOpts = '<option value="">Automatico</option>' + slots.map(s =>
+        '<option value="' + s.id + '"' + (fixed && p.date === s.id ? ' selected' : '') + '>' + esc(s.label) + '</option>'
+      ).join('');
+      const chips = fixed
+        ? '<span class="mini-avail mini-fixed">Data fissa: ' + esc(slotLabelOf(p.date)) + '</span>'
+        : dateChips(p);
+      return (
+        '<div class="item' + (fixed ? ' fixed' : '') + (paused ? ' disabled' : '') + '">' +
+          '<div class="item-main">' +
+            '<span class="item-name">' + esc(p.name) + '</span>' +
+            switchHtml +
+          '</div>' +
+          '<div class="item-tags">' + outside + pauseBadge + '</div>' +
+          '<div class="item-date">' +
+            '<label class="date-label">Data visita</label>' +
+            '<select class="date-select" data-action="set-visit-date" data-id="' + p.id + '">' + dateOpts + '</select>' +
+          '</div>' +
+          '<div class="item-chips">' + chips + '</div>' +
+          '<div class="item-meta">' + esc(meta) + '</div>' +
+          '<div class="item-actions">' +
+            '<button class="icon-btn" data-action="edit-visit" data-id="' + p.id + '" aria-label="Modifica">' + ICON_EDIT + '</button>' +
+            '<button class="icon-btn danger" data-action="del-visit" data-id="' + p.id + '" aria-label="Elimina">' + ICON_TRASH + '</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function renderResults(){
+    const el = document.getElementById('results');
+    const a = state.assignment;
+    if (!a){
+      el.innerHTML = '<p class="hint">Inserisci visitatori e persone da visitare, poi premi "Calcola abbinamenti".</p>';
+      return;
+    }
+    let html = '';
+    if (state.assignmentStale) html += '<div class="stale-banner">Dati modificati: premi "Calcola abbinamenti" per aggiornare.</div>';
+    html += '<p class="summary">' + a.count + ' su ' + a.possible + ' incontri programmati</p>';
+
+    if (!state.visits.length){
+      el.innerHTML = html + '<p class="hint">Nessuna persona da visitare inserita.</p>';
+      return;
+    }
+
+    const nameOf = x => x ? esc(x.name) : '<em>visitatori rimossi — ricalcola</em>';
+    let rows = '';
+    for (const p of state.visits){
+      const encs = (a.encounters && a.encounters[p.id]) || [];
+      const mis = (a.missed && a.missed[p.id]) || [];
+      const outside = p.outside ? '<span class="badge badge-outside">Fuori centro</span>' : '';
+      const paused = p.enabled === false;
+      const pauseBadge = paused ? '<span class="badge badge-pausa">In pausa</span>' : '';
+      let body = '';
+      for (const e of encs){
+        const minister = visitorById(e.minister);
+        const n1 = visitorById(e.normals[0]);
+        const n2 = visitorById(e.normals[1]);
+        const badges = [];
+        if (!e.flags.constantOk) badges.push('senza visitatore costante');
+        if (!e.flags.excludeOk) badges.push('include un escluso');
+        if (!e.flags.carOk) badges.push('senza vettura');
+        if (e.repeats && e.repeats.length){
+          badges.push('ripete ' + e.repeats.map(r => {
+            const v = visitorById(r.id);
+            const nm = v ? v.name : r.id;
+            return nm + ' (da ' + r.months.map(monthNameOf).join(' e ') + ')';
+          }).join(', '));
+        }
+        body +=
+          '<div class="result-enc">' +
+            '<span class="result-date">' + esc(slotLabelOf(e.date)) + '</span>' +
+            '<div class="result-people">' +
+              '<span class="badge badge-ministrante">' + nameOf(minister) + '</span>' +
+              '<span class="badge badge-normale">' + nameOf(n1) + '</span>' +
+              '<span class="badge badge-normale">' + nameOf(n2) + '</span>' +
+            '</div>' +
+            (badges.length ? '<div class="result-badges">' + badges.map(b => '<span class="warn-badge">' + esc(b) + '</span>').join('') + '</div>' : '') +
+          '</div>';
+      }
+      for (const m of mis){
+        body +=
+          '<div class="result-enc missed">' +
+            '<span class="result-date">Non abbinata</span>' +
+            '<span class="unmatched-reason">' + esc(m.reason) + '</span>' +
+          '</div>';
+      }
+      if (paused){
+        body = '<div class="result-enc"><span class="unmatched-reason">In pausa: non viene visitata in questo periodo.</span></div>';
+      } else if (!encs.length && !mis.length){
+        body = '<p class="hint">Nessun incontro programmato per questa persona.</p>';
+      }
+      rows +=
+        '<div class="result-item">' +
+          '<div class="result-head">' +
+            '<span class="result-name">' + esc(p.name) + '</span>' +
+            '<div class="item-tags">' + outside + pauseBadge + '</div>' +
+          '</div>' +
+          body +
+        '</div>';
+    }
+    html += '<div class="results-list">' + rows + '</div>';
+
+    // Utilizzo visitatori
+    const usedIds = new Set();
+    for (const list of Object.values(a.encounters || {})){
+      for (const e of list){ usedIds.add(e.minister); e.normals.forEach(n => usedIds.add(n)); }
+    }
+    const free = state.visitors.filter(v => !usedIds.has(v.id));
+    const chipOf = v => {
+      const on = v.enabled !== false;
+      return '<span class="chip' + (on ? '' : ' chip-off') + '">' + esc(v.name) + (on ? '' : ' <span class="chip-note">in pausa</span>') + '</span>';
+    };
+    html +=
+      '<div class="visitor-status">' +
+        '<p class="summary">' + usedIds.size + ' visitatori impegnati · ' + free.length + ' liberi</p>' +
+        (free.length ? '<div class="chips">' + free.map(chipOf).join('') + '</div>' : '') +
+      '</div>';
+
+    el.innerHTML = html;
+  }
+
+  function renderAll(){
+    renderPeriod();
+    renderVisitors();
+    renderVisits();
+    renderResults();
+  }
+
+  /* ---------- modal ---------- */
+  let modalState = { kind: null, id: null };
+
+  function slotCheckboxes(sel){
+    const slots = periodSlots();
+    const byWeek = groupSlotsByWeek(slots);
+    if (!slots.length) return '<p class="hint">Scegli un mese valido per mostrare le date.</p>';
+    let html = '';
+    for (const [wk, arr] of byWeek){
+      html += '<div class="week-group"><div class="week-label">Settimana del ' + esc(weekLabel(wk)) + '</div><div class="avail-grid">';
+      html += arr.map(s =>
+        '<label class="pill"><input type="checkbox" name="avail" value="' + s.id + '"' + (sel.includes(s.id) ? ' checked' : '') + '> ' + esc(s.label) + '</label>'
+      ).join('');
+      html += '</div></div>';
+    }
+    return html;
+  }
+
+  function visitorCheckboxes(sel, name){
+    if (!state.visitors.length) return '<p class="hint">Aggiungi prima qualche visitatore.</p>';
+    return '<div class="avail-grid">' + state.visitors.map(v =>
+      '<label class="pill"><input type="checkbox" name="' + name + '" value="' + v.id + '"' + (sel.includes(v.id) ? ' checked' : '') + '> ' + esc(v.name) + '</label>'
+    ).join('') + '</div>';
+  }
+
+  // Opzioni del select "Va sempre in coppia con": un solo partner; a un ministrante
+  // non sono proposti altri ministranti (ogni gruppo deve avere 1 ministrante + 2 normali).
+  function pairOptions(d){
+    const isMin = d.type === 'ministrante';
+    const opts = ['<option value="">— Nessuno —</option>'];
+    for (const v of state.visitors){
+      if (v.id === (d.id || null)) continue;
+      if (isMin && v.type === 'ministrante') continue;
+      opts.push('<option value="' + esc(v.id) + '"' + (d.pair === v.id ? ' selected' : '') + '>' + esc(v.name) + '</option>');
+    }
+    return opts.join('');
+  }
+
+  // Riapplica le opzioni del select coppia quando cambia il tipo (normale/ministrante).
+  function refreshPairSelect(){
+    const sel = document.querySelector('#modal select[name="pair"]');
+    if (!sel) return;
+    const cur = sel.value;
+    const typeInput = document.querySelector('#modal input[name="type"]:checked');
+    const d = { id: modalState.id, type: typeInput ? typeInput.value : 'normale', pair: cur };
+    sel.innerHTML = pairOptions(d);
+    if (cur !== sel.value) sel.value = cur; // ripristina il valore se l'opzione esiste ancora
+  }
+
+  // Crea/scioglie la coppia in modo mutuo: se A va con B, anche B va con A.
+  // Scioglie anche eventuali coppie precedenti di A e del nuovo partner B.
+  function setPair(aId, bId){
+    const vs = state.visitors;
+    const a = vs.find(x => x.id === aId);
+    if (!a) return;
+    if (a.pair){
+      const old = vs.find(x => x.id === a.pair);
+      if (old && old.pair === aId) old.pair = null;
+      a.pair = null;
+    }
+    if (bId){
+      const b = vs.find(x => x.id === bId);
+      if (b){
+        if (b.pair){
+          const ob = vs.find(x => x.id === b.pair);
+          if (ob && ob.pair === bId) ob.pair = null;
+          b.pair = null;
+        }
+        a.pair = bId; b.pair = aId;
+      }
+    }
+  }
+
+  function openModal(kind, id){
+    modalState = { kind: kind, id: id || null };
+    const isVisit = kind === 'visit';
+    const item = id ? (isVisit ? state.visits.find(x => x.id === id) : state.visitors.find(x => x.id === id)) : null;
+    document.getElementById('modal-title').textContent = id ? 'Modifica' : (isVisit ? 'Aggiungi persona' : 'Aggiungi visitatore');
+
+    let body;
+    if (isVisit){
+      const d = item || { name:'', outside:false, avail:[], exclude:[], constants:[] };
+      body =
+        '<label>Nome<input type="text" name="name" required value="' + esc(d.name) + '" placeholder="Nome e cognome" autocomplete="off"></label>' +
+        '<label class="check" style="margin-top:12px"><input type="checkbox" name="outside"' + (d.outside ? ' checked' : '') + '> Fuori dal centro storico (serve una vettura)</label>' +
+        '<fieldset><legend>Disponibilità (una visita al mese)</legend>' + slotCheckboxes(d.avail) + '</fieldset>' +
+        '<fieldset><legend>Visitatore costante (deve esserci a ogni incontro)</legend>' + visitorCheckboxes(d.constants, 'constants') + '</fieldset>' +
+        '<fieldset><legend>Non possono visitare questa persona</legend>' + visitorCheckboxes(d.exclude, 'exclude') + '</fieldset>';
+    } else {
+      const d = item || { name:'', type:'normale', car:false, avail:[], weekly:[] };
+      body =
+        '<label>Nome<input type="text" name="name" required value="' + esc(d.name) + '" placeholder="Nome e cognome" autocomplete="off"></label>' +
+        '<label style="margin-top:14px">Tipo</label>' +
+        '<div class="seg">' +
+          '<label class="seg-btn"><input type="radio" name="type" value="normale"' + (d.type !== 'ministrante' ? ' checked' : '') + '> Normale</label>' +
+          '<label class="seg-btn"><input type="radio" name="type" value="ministrante"' + (d.type === 'ministrante' ? ' checked' : '') + '> Ministrante</label>' +
+        '</div>' +
+        '<label class="check" style="margin-top:14px"><input type="checkbox" name="car"' + (d.car ? ' checked' : '') + '> Ha una vettura</label>' +
+        '<label style="margin-top:14px">Va sempre in coppia con</label>' +
+        '<select name="pair" style="margin-top:6px">' + pairOptions(d) + '</select>' +
+        '<p class="hint" style="margin-top:6px">Il partner scelto andrà sempre con questo visitatore; la coppia non può essere di 2 ministranti.</p>' +
+        '<fieldset><legend>Disponibilità settimanale (si ripete ogni mese)</legend>' +
+          '<div class="avail-grid">' + [1,2,3,4,5].map(dow =>
+            '<label class="pill"><input type="checkbox" name="weekly" value="' + dow + '"' + ((d.weekly || []).includes(dow) ? ' checked' : '') + '> ' + WEEKDAYS_IT[dow] + '</label>'
+          ).join('') + '</div>' +
+        '</fieldset>' +
+        '<p class="hint" style="margin-top:6px">Es. "Lunedì" rende disponibile ogni lunedì di ogni mese, anche nei mesi successivi. Si combina con le date singole.</p>' +
+        '<fieldset><legend>Disponibilità in date singole</legend>' + slotCheckboxes(d.avail) + '</fieldset>' +
+        '<p class="hint" style="margin-top:6px">Lascia disponibilità vuote per essere sempre disponibile.</p>';
+    }
+    document.getElementById('modal-body').innerHTML = body;
+    document.getElementById('modal').hidden = false;
+  }
+
+  function closeModal(){
+    document.getElementById('modal').hidden = true;
+    modalState = { kind: null, id: null };
+  }
+
+  function handleSubmit(e){
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const validIds = new Set(periodSlots().map(s => s.id));
+    if (modalState.kind === 'visit'){
+      const obj = {
+        name: (fd.get('name') || '').trim(),
+        outside: fd.has('outside'),
+        avail: fd.getAll('avail').map(String).filter(id => validIds.has(id)),
+        exclude: fd.getAll('exclude').map(String),
+        constants: fd.getAll('constants').map(String)
+      };
+      if (!obj.name) return;
+      if (modalState.id){
+        Object.assign(state.visits.find(x => x.id === modalState.id), obj);
+      } else {
+        state.visits.push(Object.assign({ id: uid(), date: null, enabled: true }, obj));
+      }
+    } else {
+      const obj = {
+        name: (fd.get('name') || '').trim(),
+        type: fd.get('type') === 'ministrante' ? 'ministrante' : 'normale',
+        car: fd.has('car'),
+        weekly: fd.getAll('weekly').map(Number).filter(n => n >= 1 && n <= 5),
+        avail: fd.getAll('avail').map(String).filter(id => validIds.has(id))
+      };
+      if (!obj.name) return;
+      const newPair = fd.get('pair') || null;
+      const existing = modalState.id ? state.visitors.find(x => x.id === modalState.id) : null;
+      const partner = newPair ? state.visitors.find(x => x.id === newPair) : null;
+      if (newPair && obj.type === 'ministrante' && partner && partner.type === 'ministrante'){
+        alert('Un ministrante non può andare in coppia con un altro ministrante: ogni gruppo deve avere 1 ministrante e 2 non ministranti.');
+        return;
+      }
+      if (existing){
+        Object.assign(existing, obj);
+        setPair(existing.id, newPair);
+      } else {
+        const id = uid();
+        state.visitors.push(Object.assign({ id: id, enabled: true }, obj));
+        setPair(id, newPair);
+      }
+    }
+    markStale();
+    save();
+    closeModal();
+    renderAll();
+  }
+
+  /* ---------- azioni ---------- */
+  function changePeriod(newStart, newEnd){
+    if (!isValidYmd(newStart) || !isValidYmd(newEnd)) return;
+    if (newEnd < newStart){ renderPeriod(); return; } // intervallo non valido: ripristina i campi
+    if (newStart === state.range.start && newEnd === state.range.end) return;
+    const hasAvail = state.visitors.some(v => v.avail && v.avail.length) || state.visits.some(p => p.avail && p.avail.length);
+    if (hasAvail && !confirm('Cambiare periodo manterrà le disponibilità settimanali e rimuoverà le date individuali fuori periodo. Continuare?')) { renderPeriod(); return; }
+    state.range = { start: newStart, end: newEnd };
+    const ids = new Set(periodSlots().map(s => s.id));
+    state.visitors.forEach(v => v.avail = v.avail.filter(id => ids.has(id))); // weekly resta intatto
+    state.visits.forEach(p => {
+      p.avail = p.avail.filter(id => ids.has(id));
+      if (p.date && !ids.has(p.date)) p.date = null; // una data fissa vale solo dentro il periodo
+    });
+    state.assignment = null;
+    state.assignmentStale = false;
+    save();
+    renderAll();
+  }
+
+  function deleteVisitor(id){
+    if (!confirm('Eliminare questo visitatore?')) return;
+    state.visitors = state.visitors.filter(v => v.id !== id);
+    state.visitors.forEach(v => { if (v.pair === id) v.pair = null; });
+    state.visits.forEach(p => {
+      p.exclude = p.exclude.filter(x => x !== id);
+      p.constants = p.constants.filter(x => x !== id);
+    });
+    markStale(); save(); renderAll();
+  }
+
+  function deleteVisit(id){
+    if (!confirm('Eliminare questa persona?')) return;
+    state.visits = state.visits.filter(p => p.id !== id);
+    markStale(); save(); renderAll();
+  }
+
+  function calculate(){
+    if (!state.visits.length || !state.visitors.length){
+      document.getElementById('results').innerHTML = '<p class="hint">Inserisci visitatori e persone da visitare, poi premi "Calcola abbinamenti".</p>';
+      return;
+    }
+    state.assignment = OM.solve({ visitors: state.visitors, visits: state.visits, range: state.range, history: state.history });
+    // Registra gli abbinamenti nella storia sotto il mese d'inizio (per evitare ripetizioni nei mesi successivi).
+    const h = {};
+    for (const pid in (state.assignment.encounters || {})){
+      const list = state.assignment.encounters[pid];
+      if (list && list.length) h[pid] = [list[0].minister, list[0].normals[0], list[0].normals[1]];
+    }
+    state.history[state.range.start.slice(0, 7)] = h;
+    state.assignmentStale = false;
+    save(); renderAll();
+  }
+
+  function clearResults(){
+    state.assignment = null;
+    state.assignmentStale = false;
+    save(); renderAll();
+  }
+
+  function resetAll(){
+    if (!confirm('Eliminare tutti i dati e ricominciare da capo?')) return;
+    state = defaultState();
+    save(); renderAll();
+  }
+
+  /* ---------- esportazione PDF (stampa) ---------- */
+  function rangeLabel(r){
+    const fmt = s => { const p = s.split('-').map(Number); return p[2] + ' ' + MONTHS_IT[p[1] - 1]; };
+    return fmt(r.start) + ' – ' + fmt(r.end) + ' ' + r.end.slice(0, 4);
+  }
+  function monthNameOf(my){
+    const m = parseInt(my.slice(5, 7), 10) - 1;
+    return MONTHS_IT[m] || my;
+  }
+  function buildPrintHTML(){
+    const a = state.assignment;
+    if (!a) return '';
+    const nameOf = id => {
+      const v = visitorById(id);
+      return v ? esc(v.name) : '<em>visitatore rimosso</em>';
+    };
+    // Raccoglie tutti gli incontri e li ordina per data.
+    const encs = [];
+    for (const p of state.visits){
+      for (const e of ((a.encounters && a.encounters[p.id]) || [])){
+        encs.push({ date: e.date, person: p, e: e });
+      }
+    }
+    encs.sort((x, y) => x.date < y.date ? -1 : (x.date > y.date ? 1 : 0));
+    let rows = '';
+    for (const it of encs){
+      const e = it.e;
+      rows +=
+        '<tr>' +
+          '<td class="pa-date-col">' + esc(slotLabelOf(e.date)) + '</td>' +
+          '<td class="pa-person-col">' + esc(it.person.name) + (it.person.outside ? ' <span class="pa-tag">Fuori centro</span>' : '') + '</td>' +
+          '<td>' + nameOf(e.minister) + '</td>' +
+          '<td>' + nameOf(e.normals[0]) + '</td>' +
+          '<td>' + nameOf(e.normals[1]) + '</td>' +
+        '</tr>';
+    }
+    // Persone non abbinati.
+    const misNotes = [];
+    for (const p of state.visits){
+      const mis = (a.missed && a.missed[p.id]) || [];
+      for (const m of mis){
+        misNotes.push(esc(p.name) + ' — ' + esc(m.reason));
+      }
+    }
+    let html =
+      '<div class="pa-header">' +
+        '<div class="pa-title">OrganizzaVisite — Programma incontri</div>' +
+        '<div class="pa-month">' + rangeLabel(state.range) + '</div>' +
+      '</div>' +
+      '<p class="pa-summary">' + a.count + ' su ' + a.possible + ' incontri programmati</p>' +
+      '<table class="pa-grid">' +
+        '<thead><tr><th>Data</th><th>Persona da visitare</th><th>Ministrante</th><th>Non ministrante</th><th>Non ministrante</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>';
+    if (misNotes.length){
+      html += '<p class="pa-note">Non abbinati: ' + misNotes.join('; ') + '.</p>';
+    }
+    return html;
+  }
+  function printPDF(){
+    if (!state.assignment){
+      alert('Calcola prima gli abbinamenti con "Calcola abbinamenti".');
+      return;
+    }
+    document.getElementById('print-area').innerHTML = buildPrintHTML();
+    window.print();
+  }
+
+  function exportData(){
+    const data = {
+      app: 'OrganizzaVisite', version: 3, range: state.range,
+      visitors: state.visitors, visits: state.visits, history: state.history
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'organizzavisite-' + state.range.start + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function importData(file){
+    const reader = new FileReader();
+    reader.onload = function(){
+      try{
+        const data = JSON.parse(reader.result);
+        if (!data || !Array.isArray(data.visitors) || !Array.isArray(data.visits)){
+          alert('File non valido: non trovo i dati di OrganizzaVisite.');
+          return;
+        }
+        // Accetta il nuovo "range" oppure il vecchio "monthYear" (convertendolo).
+        let range = null;
+        if (data.range && isValidYmd(data.range.start) && isValidYmd(data.range.end) && data.range.start <= data.range.end){
+          range = { start: data.range.start, end: data.range.end };
+        } else if (typeof data.monthYear === 'string' && /^\d{4}-\d{2}$/.test(data.monthYear)){
+          range = rangeFromMonth(data.monthYear);
+        }
+        if (!range){
+          alert('File non valido: non trovo i dati di OrganizzaVisite.');
+          return;
+        }
+        if (!confirm('Importare i dati dal file? I dati attuali verranno sostituiti.')) return;
+        const slots = OM.slotsInRange(range.start, range.end);
+        const ids = new Set(slots.map(s => s.id));
+        state.range = range;
+        state.visitors = (data.visitors || []).filter(v => v && v.name).map(v => ({
+          id: v.id || uid(), name: String(v.name),
+          type: v.type === 'ministrante' ? 'ministrante' : 'normale',
+          car: !!v.car,
+          enabled: v.enabled !== false,
+          pair: typeof v.pair === 'string' ? v.pair : null,
+          weekly: Array.isArray(v.weekly) ? v.weekly.map(Number).filter(n => n >= 1 && n <= 5) : [],
+          avail: (v.avail || []).filter(id => ids.has(id))
+        }));
+        state.visits = (data.visits || []).filter(p => p && p.name).map(p => ({
+          id: p.id || uid(), name: String(p.name), outside: !!p.outside,
+          enabled: p.enabled !== false,
+          avail: (p.avail || []).filter(id => ids.has(id)),
+          date: (typeof p.date === 'string' && ids.has(p.date)) ? p.date : null,
+          exclude: (p.exclude || []).slice(),
+          constants: (p.constants || p.must || []).slice()
+        }));
+        // Normalizza le coppie: valide solo se mutue e non ministrante+ministrante.
+        const idByV = {};
+        for (const v of state.visitors) idByV[v.id] = v;
+        for (const v of state.visitors){
+          const p = v.pair ? idByV[v.pair] : null;
+          if (!p || p.pair !== v.id || (v.type === 'ministrante' && p.type === 'ministrante')) v.pair = null;
+        }
+        // Storia abbinamenti: mantiene solo mesi validi e id di visitatori ancora esistenti.
+        const hist = {};
+        if (data.history && typeof data.history === 'object' && !Array.isArray(data.history)){
+          for (const my of Object.keys(data.history)){
+            if (!/^\d{4}-\d{2}$/.test(my)) continue;
+            const byPerson = data.history[my];
+            if (!byPerson || typeof byPerson !== 'object' || Array.isArray(byPerson)) continue;
+            const clean = {};
+            for (const pid of Object.keys(byPerson)){
+              const arr = byPerson[pid];
+              if (!Array.isArray(arr)) continue;
+              const filtered = arr.filter(id => typeof id === 'string' && idByV[id]);
+              if (filtered.length) clean[pid] = filtered;
+            }
+            if (Object.keys(clean).length) hist[my] = clean;
+          }
+        }
+        state.history = hist;
+        state.assignment = null;
+        state.assignmentStale = false;
+        save();
+        renderAll();
+      }catch(err){
+        alert('Impossibile leggere il file: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  /* ---------- eventi ---------- */
+  document.addEventListener('click', function(e){
+    const t = e.target.closest('[data-action]');
+    if (!t) return;
+    const action = t.dataset.action;
+    const id = t.dataset.id;
+    switch (action){
+      case 'add-visitor': openModal('visitor'); break;
+      case 'edit-visitor': openModal('visitor', id); break;
+      case 'del-visitor': deleteVisitor(id); break;
+      case 'add-visit': openModal('visit'); break;
+      case 'edit-visit': openModal('visit', id); break;
+      case 'del-visit': deleteVisit(id); break;
+      case 'calc': calculate(); break;
+      case 'clear-results': clearResults(); break;
+      case 'reset-all': resetAll(); break;
+      case 'export': exportData(); break;
+      case 'print': printPDF(); break;
+      case 'import': document.getElementById('import-input').click(); break;
+      case 'close-modal': closeModal(); break;
+    }
+  });
+
+  // Pausa on/off di visitatori e persone da visitare, e data fissa delle persone da visitare.
+  document.addEventListener('change', function(e){
+    const t = e.target;
+    if (!t || !t.dataset) return;
+    if (t.dataset.action === 'toggle-visitor'){
+      const v = visitorById(t.dataset.id);
+      if (!v) return;
+      v.enabled = !!t.checked;
+      markStale(); save(); renderAll();
+    } else if (t.dataset.action === 'toggle-visit'){
+      const p = state.visits.find(x => x.id === t.dataset.id);
+      if (!p) return;
+      p.enabled = !!t.checked;
+      markStale(); save(); renderAll();
+    } else if (t.dataset.action === 'set-visit-date'){
+      const p = state.visits.find(x => x.id === t.dataset.id);
+      if (!p) return;
+      p.date = t.value || null;
+      markStale(); save(); renderAll();
+    }
+  });
+
+  document.getElementById('modal').addEventListener('click', function(e){
+    if (e.target === this) closeModal();
+  });
+  document.getElementById('modal').addEventListener('change', function(e){
+    if (e.target && e.target.name === 'type') refreshPairSelect();
+  });
+  document.getElementById('modal-form').addEventListener('submit', handleSubmit);
+  document.getElementById('range-start').addEventListener('change', function(e){
+    if (e.target.value) changePeriod(e.target.value, state.range.end);
+  });
+  document.getElementById('range-end').addEventListener('change', function(e){
+    if (e.target.value) changePeriod(state.range.start, e.target.value);
+  });
+  document.getElementById('import-input').addEventListener('change', function(e){
+    const f = e.target.files && e.target.files[0];
+    if (f) importData(f);
+    e.target.value = '';
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeModal(); });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
