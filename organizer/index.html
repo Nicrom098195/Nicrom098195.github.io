@@ -488,23 +488,26 @@ const OM = (function(){
     return Math.floor(Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) / 86400000);
   }
 
-  // Limite rigido: un ministrante al massimo 2 incarichi in una qualsiasi finestra di
-  // 21 giorni consecutivi. Aggiungere `date` è lecito solo se non esistono due date già
-  // assegnate a quel ministrante che, insieme a `date`, stiano entro 20 giorni.
-  function ministerWindowOk(dates, date){
-    if (!dates || dates.length < 2) return true;
-    const all = dates.concat(date).sort();
-    for (let i = 0; i + 2 < all.length; i++){
-      if (dayNum(all[i + 2]) - dayNum(all[i]) <= 20) return false;
+  // Preferenza (NON vincolo rigido): un ministrante al massimo 3 incarichi in una
+  // qualsiasi finestra di 21 giorni consecutivi. `withinCap` dice se aggiungere `date`
+  // resta nel limite: servono 4 date entro 20 giorni di scarto per violarlo. Se violarlo
+  // è inevitabile per visitare tutti, il gruppo viene comunque usato (vedi greedyRun).
+  const CAP_MAX = 3;
+  const CAP_SPAN = 20; // una finestra di 21 giorni consecutivi = 20 giorni di scarto
+  function withinCap(dates, date){
+    const all = (dates || []).concat(date).sort();
+    for (let i = 0; i + CAP_MAX < all.length; i++){
+      if (dayNum(all[i + CAP_MAX]) - dayNum(all[i]) <= CAP_SPAN) return false;
     }
     return true;
   }
 
   function greedyRun(pre, rand){
     const dateUsage = {};  // date -> Set(vid) (stesso visitatore non doppio sulla stessa data)
-    const minDates = {};   // ministrante -> date già assegnate (per il limite "max 2 in 21 giorni")
+    const minDates = {};   // ministrante -> date già assegnate (per il limite "max 3 in 21 giorni")
     const load = {};       // vid -> numero di incarichi
     const assigned = [];
+    let capViolations = 0; // quante assegnazioni sforano la finestra di 21 giorni
     const remaining = pre.slice();
 
     function hardFeasible(entry){
@@ -512,7 +515,6 @@ const OM = (function(){
       for (const g of entry.groups){
         const du = dateUsage[g.date];
         if (du && (du.has(g.minister) || du.has(g.normals[0]) || du.has(g.normals[1]))) continue;
-        if (!ministerWindowOk(minDates[g.minister], g.date)) continue;
         out.push(g);
       }
       return out;
@@ -552,19 +554,21 @@ const OM = (function(){
           cand.push(g);
         }
         if (cand.length){
-          let bg = null, bs = -Infinity, brp = Infinity, blocal = Infinity, blmax = Infinity, blsum = Infinity;
+          let bg = null, bs = -Infinity, bcap = -1, brp = Infinity, blocal = Infinity, blmax = Infinity, blsum = Infinity;
           for (const g of cand){
             const score = (g.constantOk ? 4 : 0) + (g.excludeOk ? 2 : 0) + (g.carOk ? 1 : 0);
+            const cap = withinCap(minDates[g.minister], g.date) ? 1 : 0; // preferisci chi resta nel limite
             const rp = (g.repN || 0) * 2 + (g.repM || 0); // normali ripetuti pesano più dei ministranti
             const local = localLoad(g.minister, g.date);  // ministrante già impegnato vicino nel tempo
             const l0 = load[g.minister] || 0, l1 = load[g.normals[0]] || 0, l2 = load[g.normals[1]] || 0;
             const lmax = Math.max(l0, l1, l2);      // non spremere chi ha già più incarichi
             const lsum = l0 + l1 + l2;
             if (score > bs ||
-                (score === bs && rp < brp) ||
-                (score === bs && rp === brp && local < blocal) ||
-                (score === bs && rp === brp && local === blocal && (lmax < blmax || (lmax === blmax && lsum < blsum)))){
-              bg = g; bs = score; brp = rp; blocal = local; blmax = lmax; blsum = lsum;
+                (score === bs && cap > bcap) ||
+                (score === bs && cap === bcap && rp < brp) ||
+                (score === bs && cap === bcap && rp === brp && local < blocal) ||
+                (score === bs && cap === bcap && rp === brp && local === blocal && (lmax < blmax || (lmax === blmax && lsum < blsum)))){
+              bg = g; bs = score; bcap = cap; brp = rp; blocal = local; blmax = lmax; blsum = lsum;
             }
           }
           chosen = bg;
@@ -574,6 +578,7 @@ const OM = (function(){
       }
 
       if (chosen){
+        if (!withinCap(minDates[chosen.minister], chosen.date)) capViolations++;
         const ids = [chosen.minister, chosen.normals[0], chosen.normals[1]];
         const du = dateUsage[chosen.date] = dateUsage[chosen.date] || new Set();
         for (const id of ids) du.add(id);
@@ -586,7 +591,7 @@ const OM = (function(){
         });
       }
     }
-    return assigned;
+    return { assigned: assigned, capViolations: capViolations };
   }
 
   function solve(args, opts){
@@ -694,13 +699,16 @@ const OM = (function(){
 
     const possible = pre.length;
 
-    // Restart randomizzati; migliore per (count, totalFlags)
+    // Restart randomizzati. Priorità: 1) coprire più visite (visitare tutti);
+    // 2) meno sforamenti del limite del ministrante; 3) carichi più equilibrati
+    // (max - min tra i visitatori usati); poi le preferenze morbide già esistenti.
     let best = null;
     const maxRuns = opts.maxRuns || 100;
     const budgetMs = opts.budgetMs || 1800;
     const start = Date.now();
     for (let r = 0; r < maxRuns && Date.now() - start < budgetMs; r++){
-      const assigned = greedyRun(pre, rand);
+      const run = greedyRun(pre, rand);
+      const assigned = run.assigned;
       const count = assigned.length;
       let totalFlags = 0, totalRepeat = 0;
       const loads = {};
@@ -709,21 +717,30 @@ const OM = (function(){
         totalRepeat += (a.group.repN || 0) * 2 + (a.group.repM || 0);
         for (const id of [a.group.minister, a.group.normals[0], a.group.normals[1]]) loads[id] = (loads[id] || 0) + 1;
       }
-      // Equilibrio: meno incarichi massimi a una sola persona (poi distribuzione complessiva).
-      let maxLoad = 0, sumSq = 0;
-      for (const id in loads){ const L = loads[id]; if (L > maxLoad) maxLoad = L; sumSq += L * L; }
+      // Equilibrio: nessuno usato deve avere più di un incarico in più di chi ne ha meno.
+      let maxLoad = 0, minLoad = Infinity, sumSq = 0;
+      for (const id in loads){ const L = loads[id]; if (L > maxLoad) maxLoad = L; if (L < minLoad) minLoad = L; sumSq += L * L; }
+      if (minLoad === Infinity) minLoad = 0;
+      const spread = maxLoad - minLoad;
+      const capViolations = run.capViolations;
       const better = !best || count > best.count ||
         (count === best.count && (
-          totalFlags > best.totalFlags ||
-          (totalFlags === best.totalFlags && (
-            totalRepeat < best.totalRepeat ||
-            (totalRepeat === best.totalRepeat &&
-              (maxLoad < best.maxLoad || (maxLoad === best.maxLoad && sumSq < best.sumSq)))
+          capViolations < best.capViolations ||
+          (capViolations === best.capViolations && (
+            spread < best.spread ||
+            (spread === best.spread && (
+              totalFlags > best.totalFlags ||
+              (totalFlags === best.totalFlags && (
+                totalRepeat < best.totalRepeat ||
+                (totalRepeat === best.totalRepeat &&
+                  (maxLoad < best.maxLoad || (maxLoad === best.maxLoad && sumSq < best.sumSq)))
+              ))
+            ))
           ))
         ));
-      if (better) best = { assigned: assigned, count: count, totalFlags: totalFlags, totalRepeat: totalRepeat, maxLoad: maxLoad, sumSq: sumSq };
+      if (better) best = { assigned: assigned, count: count, totalFlags: totalFlags, totalRepeat: totalRepeat, maxLoad: maxLoad, sumSq: sumSq, spread: spread, capViolations: capViolations };
     }
-    if (!best) best = { assigned: [], count: 0, totalFlags: 0, totalRepeat: 0, maxLoad: 0, sumSq: 0 };
+    if (!best) best = { assigned: [], count: 0, totalFlags: 0, totalRepeat: 0, maxLoad: 0, sumSq: 0, spread: 0, capViolations: 0 };
 
     const encountersMap = {};
     const missedMap = {};
@@ -745,7 +762,7 @@ const OM = (function(){
     for (const pr of pre){
       if (assignedKeys.has(pr.enc.personId)) continue;
       (missedMap[pr.enc.personId] = missedMap[pr.enc.personId] || []).push({
-        reason: pr.reason || 'Visitatori già impegnati su quelle date o ministrante al limite'
+        reason: pr.reason || 'Visitatori già impegnati su quelle date'
       });
     }
 
